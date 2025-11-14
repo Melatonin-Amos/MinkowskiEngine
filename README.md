@@ -38,7 +38,7 @@ The Minkowski Engine is an auto-differentiation library for sparse tensors. It s
 #endif
 ```
 
-And modify `MinkowskiEngine/spmm.cu`, add the following includes:
+- And modify `MinkowskiEngine/spmm.cu`, add the following includes:
 
 ```c++
 /* line 31-37 */
@@ -49,7 +49,7 @@ And modify `MinkowskiEngine/spmm.cu`, add the following includes:
 #include <thrust/system/cuda/execution_policy.h>
 #include <thrust/tuple.h>
 ```
-And modify `MinkowskiEngine/src/3rdparty/concurrent_unordered_map.cuh`, add the following includes:
+- And modify `MinkowskiEngine/src/3rdparty/concurrent_unordered_map.cuh`, add the following includes:
 
 ```c++
 /* line 30-32 */
