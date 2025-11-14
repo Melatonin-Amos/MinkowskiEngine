@@ -10,6 +10,56 @@
 
 The Minkowski Engine is an auto-differentiation library for sparse tensors. It supports all standard neural network layers such as convolution, pooling, unpooling, and broadcasting operations for sparse tensors. For more information, please visit [the documentation page](http://nvidia.github.io/MinkowskiEngine/overview.html).
 
+- Notably, on 5090, `/usr/include/c++/11/bits/shared_ptr_base.h` should be modified as (refer to [issue](https://github.com/NVIDIA/MinkowskiEngine/issues/596)):
+```c++
+/* line 1190-1212 */
+	{
+	  auto __raw = std::__to_address(__r.get()); //modified by user https://github.com/NVIDIA/MinkowskiEngine/issues/596
+	  _M_refcount = __shared_count<_Lp>(std::move(__r));
+	  _M_enable_shared_from_this_with(__raw);
+	}
+
+#if __cplusplus <= 201402L && _GLIBCXX_USE_DEPRECATED
+    protected:
+      // If an exception is thrown this constructor has no effect.
+      template<typename _Tp1, typename _Del,
+	       typename enable_if<__and_<
+		 __not_<is_array<_Tp>>, is_array<_Tp1>,
+	         is_convertible<typename unique_ptr<_Tp1, _Del>::pointer, _Tp*>
+	       >::value, bool>::type = true>
+	__shared_ptr(unique_ptr<_Tp1, _Del>&& __r, __sp_array_delete)
+	: _M_ptr(__r.get()), _M_refcount()
+	{
+	  auto __raw = std::__to_address(__r.get()); //modified by user https://github.com/NVIDIA/MinkowskiEngine/issues/596
+	  _M_refcount = __shared_count<_Lp>(std::move(__r));
+	  _M_enable_shared_from_this_with(__raw);
+	}
+    public:
+#endif
+```
+
+And modify `MinkowskiEngine/spmm.cu`, add the following includes:
+
+```c++
+/* line 31-37 */
+#include <thrust/execution_policy.h>
+#include <thrust/iterator/zip_iterator.h>
+#include <thrust/reduce.h>
+#include <thrust/sort.h>
+#include <thrust/system/cuda/execution_policy.h>
+#include <thrust/tuple.h>
+```
+And modify `MinkowskiEngine/src/3rdparty/concurrent_unordered_map.cuh`, add the following includes:
+
+```c++
+/* line 30-32 */
+#include <thrust/execution_policy.h>
+#include <thrust/remove.h>
+#include <thrust/unique.h>
+```
+
+- Also, you should modify `setup.py` as shown in this [issue](https://github.com/NVIDIA/MinkowskiEngine/issues/614#issuecomment-2886009673).
+
 ## News
 
 - 2021-08-11 Docker installation instruction added
