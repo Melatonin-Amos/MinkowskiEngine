@@ -120,7 +120,7 @@ def _argparse(pattern, argv, is_flag=True, is_list=False):
 
 
 run_command("rm", "-rf", "build")
-run_command("pip", "uninstall", "MinkowskiEngine", "-y")
+# run_command("pip", "uninstall", "MinkowskiEngine", "-y")
 
 # For cpu only build
 CPU_ONLY, argv = _argparse("--cpu_only", argv)
@@ -307,11 +307,15 @@ ARGS = SOURCE_SETS[target][3]
 CC_FLAGS += ARGS
 NVCC_FLAGS += ARGS
 
+cxx_compile_args = CC_FLAGS + ["-DNVTX_DISABLE"]
+nvcc_compile_args = NVCC_FLAGS + ["-DNVTX_DISABLE"]
+
 ext_modules = [
     Extension(
         name="MinkowskiEngineBackend._C",
         sources=[*[str(SRC_PATH / src_file) for src_file in SRC_FILES], *BIND_FILES],
-        extra_compile_args={"cxx": CC_FLAGS, "nvcc": NVCC_FLAGS},
+        define_macros=[("NVTX_DISABLE", None)],
+        extra_compile_args={"cxx": cxx_compile_args, "nvcc": nvcc_compile_args},
         libraries=libraries,
     ),
 ]
